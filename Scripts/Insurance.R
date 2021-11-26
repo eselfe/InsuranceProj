@@ -16,6 +16,7 @@ library(magrittr)
 
 
 data <- py$Num_data
+OGdata <- py$data
 
 
 data$AGE <- as.numeric(unlist(data$AGE))
@@ -38,6 +39,31 @@ attach(data)
 # -----------------------------------------------------------------------------
 # --- DATA EXPLORATION --------------------------------------------------------
 # -----------------------------------------------------------------------------
+
+
+ggplot(data = OGdata) + 
+  geom_point(mapping = aes(x = AGE, y = INCOME))
+
+
+ggplot(data = OGdata) + 
+  geom_point(mapping = aes(x = AGE, y = INCOME, color = CAR_USE)) + 
+  facet_grid(~ CAR_TYPE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # -----------------------------------------------------------------------------

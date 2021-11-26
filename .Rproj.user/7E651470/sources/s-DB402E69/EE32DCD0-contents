@@ -47,7 +47,6 @@ library(reticulate)
 
 ```
 
-
 ```{python}
 import numpy as np
 import pandas as pd
@@ -63,8 +62,8 @@ from array import *
 
 ```{python}
 data = pd.read_csv(r"C:\Users\Silas\Documents\ADEC7320\Data\insurance_training_data.csv")
-
 ```
+
 
 
 ```{python}
@@ -92,28 +91,6 @@ data["BLUEBOOK"] = money[2].values
 data["OLDCLAIM"] = money[3].values
 ```
 
-```{python}
-# --- Categorizing by Car Type
-carType = pd.unique(data.CAR_TYPE)
-carType_Info = data.groupby("CAR_TYPE").mean()
-
-```
-
-```{python}
-# ----------------------------------------------- Categorical Categories
-carType = pd.unique(data.CAR_TYPE)
-location = pd.unique(data.URBANICITY)
-jobType = pd.unique(data.JOB)
-eduLevel = pd.unique(data.EDUCATION)
-
-carType_Info = data.groupby("CAR_TYPE").mean()
-
-print(carType)
-print(location)
-print(jobType)
-print(eduLevel)
-```
-
 
 ```{python}
 data.isna().sum()
@@ -129,6 +106,68 @@ data.YOJ.fillna(data.YOJ.mean(), inplace = True)
 data.INCOME.fillna(data.INCOME.median(), inplace = True)
 data.JOB.fillna("nan", inplace = True)
 ```
+
+
+```{r}
+OGdata <- py$data
+```
+
+
+```{python}
+# --- Categorizing by Age
+ageInfo = data.groupby("AGE").mean()
+ageInfo_det = ageInfo.index.values
+
+# Loop counts observations by age
+i = 0
+for i in range(len(ageInfo)):
+  tempAge = int(float(ageInfo_det[i]))
+  amt = sum(data.AGE == tempAge)
+  
+  ageInfo.loc[tempAge,15] = amt
+
+
+
+ageInfo.rename(columns={15:'n'}, inplace = True)
+
+```
+
+
+
+# Data Exploration
+
+
+
+### Bar Plot of Age
+```{r}
+
+ageInfo <- py$ageInfo
+
+ageBar <- data.frame(
+  Age=as.integer(rownames(ageInfo)),
+  Count=ageInfo$n
+)
+
+ggplot(ageBar, aes(x=Age, y=Count))+
+  geom_bar(stat="identity", color = "blue") + 
+  ggtitle("Frequency of Observed Ages")
+
+```
+
+
+```{r}
+ggplot(data = OGdata) + 
+  geom_point(mapping = aes(x = AGE, y = INCOME, color = CAR_USE)) + 
+  facet_grid(~ CAR_TYPE)
+
+sum(OGdata$CAR_USE[OGdata$CAR_TYPE == "Minivan"])
+
+types <- OGdata %>% 
+  groupby(CAR_TYPE)
+
+
+```
+
 
 
 ```{python}
@@ -183,23 +222,6 @@ Num_data.loc[Num_data['URBANICITY'] == 'z_Highly Rural/ Rural', 'URBANICITY'] = 
 
 
 
-```{python}
-# --- Categorizing by Age
-ageInfo = data.groupby("AGE").mean()
-ageInfo_det = ageInfo.index.values
-
-# Loop counts observations by age
-i = 0
-for i in range(len(ageInfo)):
-  tempAge = int(float(ageInfo_det[i]))
-  amt = sum(data.AGE == tempAge)
-  
-  ageInfo.loc[tempAge,15] = amt
-
-
-ageInfo.rename(columns={15:'n'}, inplace = True)
-
-```
 
 
 
@@ -207,21 +229,7 @@ ageInfo.rename(columns={15:'n'}, inplace = True)
 
 
 
-### Bar Plot of Age
-```{r}
 
-ageInfo <- py$ageInfo
-
-ageBar <- data.frame(
-  Age=as.integer(rownames(ageInfo)),
-  Count=ageInfo$n
-)
-
-ggplot(ageBar, aes(x=Age, y=Count))+
-  geom_bar(stat="identity", color = "blue") + 
-  ggtitle("Frequency of Observed Ages")
-
-```
 
 
 
@@ -244,3 +252,27 @@ prob_commOwn_1 = sum(commOwn.TARGET_FLAG == 1) / len(commOwn)
 
 
 
+# Below might be excluded
+
+```{python}
+# --- Categorizing by Car Type
+carType = pd.unique(data.CAR_TYPE)
+carType_Info = data.groupby("CAR_TYPE").mean()
+
+```
+
+
+```{python}
+# ----------------------------------------------- Categorical Categories
+carType = pd.unique(data.CAR_TYPE)
+location = pd.unique(data.URBANICITY)
+jobType = pd.unique(data.JOB)
+eduLevel = pd.unique(data.EDUCATION)
+
+carType_Info = data.groupby("CAR_TYPE").mean()
+
+print(carType)
+print(location)
+print(jobType)
+print(eduLevel)
+```
