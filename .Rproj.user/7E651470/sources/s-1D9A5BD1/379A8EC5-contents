@@ -1,0 +1,649 @@
+---
+title: "Midterm 1"
+subtitle: "ADEC 7310.02"
+author: "Silas Selfe"
+affiliation: "Boston College"
+date: "9/26/2021"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+
+```
+
+
+# Question 1 ** ------------------------------------------------------------------
+
+probability of detecting a liar = 0.8 (sensitivity)
+
+probability of detecting a "truth teller" = 0.9 (specificity)
+
+estimated that 30% of individuals selected for polygraph will lie
+
+### 1a) ------ Probability that individual is actually a liar, given that the polygraph detected him/her as such?
+
+$$
+P(Liar | Lie) = \frac{P(Liar \text{ and } Lie)}{P(Lie)}
+$$
+
+Application of Bayes Theorm allows substitution of the numerator and
+denominator: 
+$$
+P(Liar \text{ and } Lie) = P(Lie | Liar) P(Liar)
+$$
+
+$$
+P(Lie) = P(Lie \text{ and } Truther) + P(Lie \text{ and } Liar)
+$$
+
+Via the General Multiplication Rule 
+$$
+P(Lie) = P(Truther)*P(Lie|Truther)  +  P(Liar)*P(Lie|Liar)
+$$ 
+-
+-
+-
+
+P(Liar and Lie) = P(Lie | Liar) * P(Liar)
+
+```{r}
+pLnl <- 0.8 * 0.3
+```
+
+P(Lie) = (P(Truther) * P(Lie | Truther)) + (P(Liar) * P(Lie | Liar))
+
+```{r}
+pl = (0.7 * 0.1) + (0.3 * 0.8)
+```
+
+Now with Bayes Theorm we will substitute back into the original formula.
+
+```{r}
+pLgl <- pLnl / pl
+pLgl
+```
+
+### 1b) ------ Probability that individual is actually a truth-teller, given that the polygraph detected him/her as such?
+
+$$
+P(Truther | Truth) = \frac{P(Truther \text{ and } Truth)}{P(Truth)}
+$$ 
+$$
+P(Truther \text{ and } Truth) = P(Truth | Truther) P(Truther)
+$$ 
+$$
+P(Truth) = P(Liar)*P(Truth|Liar)  +  P(Truther)*P(Truth|Truther)
+$$ P(Truther and Truth) = P(Truth \| Truther) \* P(Truther)
+
+```{r}
+pTnt <- 0.9 * 0.7
+```
+
+P(Truth) = (P(Liar) * P(Truth | Liar)) + (P(Truther) * P(Truth | Truther))
+
+```{r}
+pt <- (0.3 * 0.2) + (0.7 * 0.9)
+```
+
+Now substituting back into original formula:
+
+```{r}
+pTgt <- pTnt / pt
+pTgt
+```
+
+### 1c) ------ Probability that a randomly selected individual is either a liar or was identified as a liar by the polygraph?
+
+Probability that a randomly selected individual is _either_ a liar _or_
+told a lie during the polygraph is calculated with the General Addition
+Rule: 
+$$
+P(A \text{ or } B) = P(A) + P(B) - P(A \text{ and } B)
+$$ 
+I will let A be a Liar and B a Lie. So,
+
+P(Liar or Lie) = P(Liar) + P(Lie) - P(Liar and Lie)
+
+P(Liar) was given as 0.3\
+P(Lie) was just calculated as 0.31\
+P(Liar and Lie) was also just calculated as 0.24
+
+```{r echo=FALSE}
+pL <- 0.3
+pT <- 0.7
+```
+
+P(Liar or Lie) = `r pL` + `r pl` - `r pLnl`
+P(Liar or Lie) = `r pL + pl - pLnl`
+
+# Question 2 ** ------------------------------------------------------------------
+
+
+Your organization owns an MRI. Machine has expected lifetime of 15
+years.
+
+We expect one failure every 15 years.
+
+```{r}
+pfailure <- 1/15
+```
+
+### 2a) ------ Probability that the machine will fail at or after 10 years? Model using probability based on the assumption independent trials.
+
+$$
+P(Fails >= 10 years) = P(Lasting \text{ 9 } years)
+$$ 
+Assuming independent trials, n will represent years.\
+We will assume that for all trials where X = 9, this means from day one to day 364 in year 9. \
+Geometric Distribution: 
+$$p*(1-p)^{n-1}$$
+***Probability***
+```{r}
+n <- 9
+sum(pfailure * (1 - pfailure)^(1:9-1))
+```
+
+
+The probability that the machine will fail at or after 10 years--which
+is equivalent to the machine lasting up until 10 years, through year 1 to year 9-- is
+`r sum(pfailure * (1 - pfailure)^(1:9-1))`.
+
+
+
+### 2b) ------ Probability that the machine will fail at or after 10 years? Provide expected value and standard deviation. Model as Binomial.
+$$
+P(X >= 10) = 1 - P(X = 9)
+$$
+$$
+P(X = x) = (\frac{n}{k})*p^k*(1-p)^{(n-k)} = dbinom(k,n,p)
+$$
+
+
+The probability that there will be one success (machine failure) *at year 10 or after* is equal to the probability of having had no failures at year 9, subtracted from 1. 
+
+***Probability***
+```{r}
+1-dbinom(0,9,pfailure)
+
+```
+***Expected Value***
+$$
+E[X] = np
+$$
+```{r}
+n * pfailure
+```
+***Standard Deviation***
+$$
+sd = \sqrt(n*p*(1-p))
+$$
+```{r}
+sqrt(n * pfailure * (1 - pfailure))
+```
+
+
+
+### 2c) ------ Probability that the machine will fail at or after 10 years? Provide expected value and standard deviation. Model as Poisson.
+
+$$P(X = 9) = \frac{\lambda^x e^{-\lambda}}{x!} $$
+$$\lambda = \frac{np}{t} = \frac{9*0.0667}{1} = 0.6003$$
+
+***Probability***
+```{r}
+sum(dpois(1:9, 0.6))
+
+```
+```{r}
+
+```
+
+
+***Expected Value***
+$$
+E[X] = \frac{1}{\lambda}
+$$
+```{r}
+1 / (n * pfailure)
+```
+***Standard Deviation***
+$$sd = \sqrt(\frac{1}{\lambda^2})$$
+```{r}
+sqrt(1/(1/(n*pfailure)^2))
+```
+
+
+# Question 3 ** ------------------------------------------------------------------
+
+
+from the challenger dataset:
+
+_launch:_ this numbers the temperature-sorted observations from 1 to
+23.
+_temp:_ temperature in degrees Fahrenheit at the time of launch.
+_incident:_ if there was an incident with an O-Ring, then it is coded
+"Yes."
+_o_ring_probs:_ counts the number of O-Ring partial failures experienced
+on the flight.
+
+```{r echo=FALSE, message=FALSE}
+library(readr)
+library(psych)
+library(xtable)
+
+getwd()
+setwd("C:/Users/Silas/Documents/ADEC7310/Midterms/")
+challenger <- read_csv("Data/challenger.csv")
+show_col_types = FALSE
+```
+
+
+
+### 3a) ------ What are the levels of measurement (nominal, ordinal, interval, ration) of these variables? Justify.
+
+```{r comment=NA}
+names(challenger)
+```
+
+Going left to right:
+
+1.  `r names(challenger[1])` is _Qualitative_ of type _Ordinal_  
+    To know the situation of the Challenger Launch, this is the variable
+    that qualifies any given and specific moment allowing insight to be
+    gained. Its associated number correlates to and describes a single
+    moment which entails other descriptive information.
+
+2.  `r names(challenger[2])` is _Quantitative_ of type _Interval_  
+    Temperature is a direct quantitative and continuous measurement
+    meaning that it can take any value within a given range.
+
+3.  `r names(challenger[3])` is _Qualitative_ of type _Nominal_  
+    This variable is unordered and mutually exclusive. It simply states
+    whether there is or is not an incident occurring for any given
+    observation.
+
+4.  `r names(challenger[4])` is _Quantitative_ of type _Ratio_
+    This variable has a theoretical zero and takes the value of a whole
+    number. The value it takes is a descriptive count of occurrences.
+
+
+
+
+
+
+### 3b) ------ Provide appropriate descriptive statistics and graphs for the variable o_ring_probs. Interpret. Provide measures of center, spread, shape, position, and two appropriate plots that are appropriate for the level of measurement. Discuss the distribution based on the graphs and statistics. Does its shape remind you of any distribution we have evaluated so far?
+
+```{r message=FALSE, fig.width=8, fig.height=5, fig.fullwidth=TRUE}
+library(ggplot2)
+
+data <- challenger
+data$ringFail <- 0  
+
+i <- 0
+r <- 0
+for (i in 1:length(data$launch)){
+  for (r in 1:4){
+    if (data$o_ring_probs[i] == r){
+      
+      if (r == 3){
+        data$o_ring_probs[i] <- 80
+      } else if(r == 2){
+        data$o_ring_probs[i] <- 70
+      } else if(r == 1){
+        data$o_ring_probs[i] <- 60
+      } else{
+        data$o_ring_probs[i] <- NA
+      }
+    }
+  }
+  if(data$o_ring_probs[i] > 0){
+    data$ringFail[i] <- data$o_ring_probs[i] - min(data$temp) + 3.6
+  }else{
+    data$ringFail[i] <- 0
+  }
+}
+
+p <- ggplot(data = data, mapping = aes(x = launch, y = temp, color = incident)) + 
+          coord_cartesian(ylim = c(53,82)) + 
+          geom_point(size = 3) + 
+          geom_smooth(se = FALSE) + 
+          ggtitle("Temp and O-Ring Failures v Launch") + 
+          geom_point(mapping = aes(x = launch, y = o_ring_probs, size = 2), 
+                     shape = 23, fill = "blue", inherit.aes = FALSE, color = "blue", show.legend = FALSE) +
+          
+            scale_y_continuous(
+              "Temperature (F)",
+              sec.axis = sec_axis(~./10 - 5, name = "O-Ring Partial Failures")
+            ) +
+            theme(axis.title.y.right = element_text(color = "blue"),
+                  axis.text.y.right = element_text(color = "blue")
+            )
+
+p <- p + theme(legend.position = "left",
+               plot.margin = margin(3,3,3,3))
+p
+```
+
+```{r fig.width=8, fig.height=8, fig.fullwidth=TRUE}
+p1 <- ggplot(data) + 
+        geom_boxplot(mapping = aes(x = launch, y = temp, group=incident, color = incident))
+
+p1 <- p1 + labs(x = "Launch", y = "Temperature (F)")
+p1 + theme(legend.position = "left")
+```
+
+```{r comment=NA}
+describe(challenger)
+```
+
+My first observation looking at these graphs is that the frequency of O-Ring partial failures is significantly greater when the temperature is increasing immediately after launch. Three failures occur almost immediately and another three occur just before reaching what appears to be a Temperature inflection point. Something that stands out is the overlap seen on the best fit lines that differ by 'incident.' The box plots show that only 25% of observed **incidents** happened after the mean temperature of 69.02 is reached--with 75% occurring before the mean is reached--and also that 50% of observed **non-incidents** are seen after the mean temperature is reached.  
+
+It is interesting to note that the apparent 'inflection points' seem to be occurring within roughly 1 standard deviation (6.97) from the mean Temperature in both directions. Also within ~1 standard deviation from the mean temperature, the outer tails of the 25th percentile for both 'incident' and 'non-incident' are observed. 
+
+```{r echo=FALSE, results='hide'}
+(max(data$temp[data$incident=="Yes"]) - mean(data$temp[data$incident == "Yes"])) / 
+  sd(data$temp[data$incident == "Yes"])
+
+(min(data$temp[data$incident=="No"]) - mean(data$temp[data$incident == "No"])) / 
+  sd(data$temp[data$incident == "No"])
+```
+The Z scores for the furthest value from the mean temperature are as follows:    
+* The furthest observed _incident_ occurs `r sd(data$temp[data$incident == "Yes"])` degrees _above_ the mean. Z_score = `r (max(data$temp[data$incident=="Yes"]) - mean(data$temp[data$incident == "Yes"])) / sd(data$temp[data$incident == "Yes"])`  
+* The furthest observed _non-incident_ occurs `r sd(data$temp[data$incident == "No"])` degrees _below_ the mean. Z_score = `r (min(data$temp[data$incident=="No"]) - mean(data$temp[data$incident == "No"])) / sd(data$temp[data$incident == "No"])`  
+
+The shape seen in the first graph looks like a normal probability plot, depicting a normally distributed histogram of sample means, with Theoretical quantiles on the x axis and Sample means on the y axis. A majority of the data points are observed around the mean, where observations of 'incidents' and 'non-incidents' are seen to overlap with one another.  
+
+
+
+
+
+
+### 3c) ------ The temperature on the day of the Challenger launch was 36 degrees Fahrenheit. Provide side-by-side boxplots for temperature by incident (temp\~incident). Why might this have been a concern?
+
+```{r echo=FALSE, fig.width=4, fig.height=6}
+boxplot(data$temp~data$incident, col=c("Red", "Green"), main="Incident Occurance v Temperature", xlab="Incident", ylab="Temperature (F)")
+```
+
+This would be concerning since O-rings are meant to block paths that liquids/gases may flow, and are likely affected by temperature. So they shrink in cold temperatures and expand in hot. As they are meant to act as a sealant, if they're cold and too small to properly seal as designed, then liquid/gas flow will not occur as planned. The box plot shows that when the temperature is low and the O-rings leaky, there are partial failures. When the temperature warms and the O-rings become snug as designed, there are fewer O-ring failures. 
+
+
+
+# Question 4 ** ------------------------------------------------------------------ 
+
+Fischer's Iris dataset provides sepal length, sepal width, petal length,
+and petal width data for three species of iris flowers. Provide your
+SINGLE, most meaningful, exploratory graphical chart comparing the four
+quantitative variables across species. Explain it. If you provide more
+than one chart, you will earn zero points.
+
+```{r echo=FALSE}
+library(datasets)
+data("iris")
+```
+
+
+```{r message=FALSE}
+ggplot(data = iris) + 
+            geom_point(mapping = aes(x = Sepal.Width, y = Sepal.Length), color = "deepskyblue") + 
+            geom_point(mapping = aes(x = Petal.Width, y = Petal.Length), color = "green") +  
+            geom_boxplot(mapping = aes(x = Sepal.Width, y = Sepal.Length, alpha = TRUE), 
+                         show.legend = FALSE, color = "darkblue") + 
+            geom_boxplot(mapping = aes(x = Petal.Width, y = Petal.Length, alpha = TRUE), 
+                         show.legend = FALSE, color = "darkgreen") +
+            labs(title = "Species Comparison: Sepal (blue) vs Petal (green)",
+                 x = "Width",
+                 y = "Length") + 
+            facet_wrap(. ~ Species) 
+
+```
+The above chart shows the variation between Sepal and Petal length and width among species. It is immediately seen that the Petal is smaller in length than the Sepal for all species under study. Moving left to right across species, the size of the Petal and Sepal begin to approach one another. With the Setosas, there is no overlap whatsoever. With the Versicolor, we see some overlap occuring in the outskirts of the 25% percentile where it is possible for the Sepal and Petal to be of similar size. Finally, with the Virginicas, the furthest reach of Petal length spans across the 75th percentile of all observed Sepal length. Vise versa, the outskirs of Virginicas 25th percentile overlaps with 50% of the observed Petal length. 
+
+
+# Question 5 ** ------------------------------------------------------------------
+
+You are constructing a histogram for describing the distribution of
+salaries of those individuals who are 40 years are older but not yet
+retired. Draw the probable shape of the distribution labeling the mean,
+median, and mode locations as well as both axes using R. (You may have
+to search for the functions that can help you.) Justify your response.
+
+```{r}
+
+X <- matrix(0, 10000, nrow=30)
+
+i <- 1
+for (i in 1:10000){
+  if (i < 2000){
+    X[1:30,i] <- sample(0:140,30, replace=TRUE)
+  }else if (i < 4000 && i >= 2000){
+    X[1:30,i] <- sample(20:80,30, replace=TRUE)
+  }else if (i < 6000 && i >= 4000){
+    X[1:30,i] <- sample(40:70,30, replace=TRUE)
+  }else if (i < 8000 && i >= 6000){
+    X[1:30,i] <- sample(40:80,30, replace=TRUE)
+  }else if (i < 9000 && i >= 8000){
+    X[1:30,i] <- sample(50:80,30, replace=TRUE)
+  }else if (i < 10000 && i >= 9000){
+    X[1:30,i] <- sample(0:180,30, replace=TRUE)
+  }
+}
+
+means = colMeans(X)
+hist(means,main = "Over 40 - Average Salary", xlim = c(35,130), xlab="Salary USD ('000's)", breaks = 80)
+
+ux <- unique(X)
+mode <- ux[which.max(tabulate(match(X,ux)))]
+
+abline(v = mean(means), col="red", lwd=4, lty=2)
+abline(v = median(means), col="blue", lwd=4, lty=1)
+abline(v = mode, col="purple", lwd=4,lty=6)
+
+```
+1. Mean is `r mean(means)` -- marked red  
+2. Median is `r median(means)` -- marked blue  
+3. Mode is `r mode` -- marked purple  
+
+I skewed the histogram to the right because as people get older, they will earn more. If people are above 40 and retired, they've either worked late into life on a lower salary, or received a high salary generally early in life. This is why I tried to make the average around 60. There are also people who like earning money, so with a higher salary they will choose to continue working instead of retiring, which would skew the distribution to the right. 
+
+
+
+# Question 6 ** ------------------------------------------------------------------
+
+
+I recently conducted some animal research where I was investigating
+survival of swine based on what drug was given to them. Data are shown
+below.
+
+```{r results='asis'}
+library(knitr)
+
+df <- data.frame(matrix(nrow=3, ncol=3))
+colnames(df) <- c("Survived", "Died", "Totals")
+rownames(df) <- c("Drug 1", "Drug 2", "Totals")
+
+df[1,] <- c(7, 0, 7)
+df[2,] <- c(5, 2, 7)
+df[3,] <- c(12, 2, 14)
+
+
+kable(df[,], caption="Data")
+```
+
+### 6a) Let A represent the drug provided (A~1~= Drug 1, A~2~= Drug 2). Let B represent the pig's survival (B~1~= Survived, B~2~= Died). For each cell, calculate the joint probability.
+
+```{r}
+pa1b1 <- df[1,1] / df[3,3]
+pa1b2 <- df[1,2] / df[3,3]
+pa2b1 <- df[2,1] / df[3,3]
+pa2b2 <- df[2,2] / df[3,3]
+```
+
+
+### 6b)
+
+```{r echo=FALSE, results='asis'}
+library(xtable)
+library(stargazer)
+library(pander)
+library(tables)
+library(ascii)
+library(knitr)
+
+
+
+df1 <- data.frame(matrix( nrow=2, ncol=2))
+df1[1,] <- c(pa1b1,pa1b2)
+df1[2,] <- c(pa2b1,pa2b2)
+
+colnames(df1) <- c("B1", "B2")
+rownames(df1) <- c("A1", "A2")
+
+
+kable(df1[,], caption="Joint Probabilities")
+```
+
+### 6c) For each row and column, calculate the marginal probability. I.e. calculate the four marginal probabilities. P(A~1~), P(A~2~), P(B~1~), P(B~2~). Place them in the following table with the results from part a.
+
+```{r results='asis'}
+pa1 <- df[1,3] / df[3,3]
+pa2 <- df[2,3] / df[3,3]
+pb1 <- df[3,1] / df[3,3]
+pb2 <- df[3,2] / df[3,3]
+
+df1[1,3] <- pa1
+df1[2,3] <- pa2
+df1[3,1] <- pb1
+df1[3,2] <- pb2
+
+df2 <- df1
+colnames(df2) <- c("Survived", "Died", "P(Ai)")
+rownames(df2) <- c("Drug 1", "Drug 2", "P(Bj)")
+
+kable(df2[,], caption = "Marginal and Joint Probabilities")
+```
+
+### 6d) Independence of events means that P(A~i~B~j~) = P(A~i~) \* P(B~j~) for all values of i and j. For true independence of events, the joint (cell) probabilities should equal the appropriate marginal probabilities multiplied by each other. In other words, you should be able to multiply the row and column marginal probabilities to obtain the cell probability. If this is not the case, then the events are not truly independent from a non-inferential point of view. Demonstrate that survival and drug choice are not independent solely based on the definition of independence. In other words, investigate if P(A~i~B~j~) = P(A~i~) x P(B~j~) for all values of i and j
+
+
+
+```{r}
+investigate <- data.frame(matrix( nrow=2, ncol=2))
+
+i <- 1
+r <- 1
+for (i in 1:(nrow(df2)-1)){
+  tempC <- df2[i,3]
+  for (r in 1:(ncol(df2)-1)){
+    tempR <- df2[3,r]
+    
+      investigate[i,r] <- tempC * tempR
+      
+  }
+}
+
+```
+```{r echo=FALSE, results='asis'}
+colnames(investigate) <- c("(pa1 * pb1)", "(pa1 * pb2)")
+rownames(investigate) <- c("(pa2 * pb1)", "(pa2 * pb2)")
+
+
+kable(investigate[,], caption = "Independence Investigation")
+```
+Survival and Drug choice are not independent as proven with the formal definition above. 
+
+
+
+# Question 7 ** ------------------------------------------------------------------
+
+The following graph represents GDP growth for the US and the Euro area.
+Identify the problems associated with this graph. Then, generate your
+own graph that portrays the data in an improved way.
+
+
+The graph in question doesn't display the data in practical way.  
+1. The angle makes it appear that GDP growth for the US is greater for all occurrences than the EU.   
+2. The angle makes reading the x axis difficult when making comparisons between the US and EU.   
+3. In general, the graph does not give an accurate feel of the data and could be somewhat misleading at first glance.   
+
+```{r}
+library(reshape2)
+
+Year <- c(1996:2006)
+US <- c(3.7, 4.5, 4.2, 4.5, 3.7, 0.8, 1.6, 2.7, 4.2, 3.5, 2.9)
+EU <- c(1.5, 2.6, 2.9, 2.8, 3.7, 1.8, 0.9, 0.7, 1.9, 1.0, 1.8)
+
+df1 <- data.frame(Year, US, EU)
+df2 <- melt(df1, id.vars = 'Year')
+```
+```{r}
+ggplot(df2, aes(x=Year, y=value, fill=variable)) +
+    geom_bar(stat='identity', position='dodge') +
+    labs(title= "GDP Growth: US v Euro Area",
+         x= "Year", y="GDP Growth (% change)") + 
+    guides(fill=guide_legend(title="Region")) + 
+    scale_x_continuous(breaks=df2$Year)
+
+```
+
+
+
+# Question 8 ** ------------------------------------------------------------------
+
+Sample of 900 computer chips revealed that 58% of chips fail in first
+1000 hours of their use.
+
+Company states that 54% of chips fail in the first 1000 hours of their
+use.\
+Quality control manager wants to test the claim that actual percentage
+that fails is different than stated.
+
+Construct 98% confidence interval for the proportion of the chips that
+fail.\
+Then conduct a hypothesis test and show all steps.
+
+Is there enough evidence at the 0.02 level to support the manager's
+claim?
+
+
+98% Confidence Interval
+```{r}
+n <- 900
+pHat <- 0.58
+
+z98 <- 2.33
+```
+Margin of Error for a Proportion
+$$
+Z * \sqrt{\frac{\hat{p}*(1-\hat{p})}{n}}
+$$
+```{r}
+m_e <- z98 * sqrt((pHat*(1-pHat))/n)
+lowBound <- pHat - m_e
+upBound <- pHat + m_e
+```
+With 95% confidence, the proportion of all defective chips produced fall between `r lowBound` and `r upBound`.  
+[`r lowBound`, `r upBound`]
+
+
+$$H_o:p = 0.54$$
+$$H_A: p \neq 0.54$$
+Z-Score for a Proportion:
+$$
+Z = \frac{\hat{p} - p}{\sqrt{\frac{p*(1-p)}{n}}}
+$$
+```{r}
+p <- 0.54
+
+Z <- (pHat - p) / sqrt((p * (1-p)) / n)
+2*pnorm(Z, lower.tail = FALSE)
+```
+p-value < alpha  
+
+At the 0.02 level, there is sufficient evidence to validate the managers claim that the actual percentage of chips that fail is different from the stated percentage. Therefor, we  reject the null and accept the alternative hypothesis. 
+
+

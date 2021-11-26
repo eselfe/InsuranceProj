@@ -1,0 +1,27 @@
+{
+    "id": "52F05107",
+    "path": "~/ADEC7320/Scripts/Probit and Logit Models.R",
+    "project_path": "Scripts/Probit and Logit Models.R",
+    "type": "r_source",
+    "hash": "1749693153",
+    "contents": "",
+    "dirty": false,
+    "created": 1637709932663.0,
+    "source_on_save": false,
+    "relative_order": 6,
+    "properties": {
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "7,18",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1637808134,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1637808134582,
+    "read_only": false,
+    "read_only_alternatives": []
+}

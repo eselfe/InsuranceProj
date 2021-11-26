@@ -1,0 +1,7 @@
+
+
+
+plot(data$Expenditures~data$RVUs)
+abline(lm(data$Expenditures~data$RVUs))
+
+lm(data$Expenditures, data$RVUs)

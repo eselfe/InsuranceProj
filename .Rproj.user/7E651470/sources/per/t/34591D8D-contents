@@ -1,0 +1,259 @@
+---
+title: "Final Exam"
+subtitle: "ADEC 7310.02"
+author: "Silas Selfe"
+affiliation: "Boston College"
+date: "10/17/2021"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+
+```
+
+```{r echo=FALSE}
+library(readr)
+library(fastGraph)
+library(Amelia)
+library(dplyr)
+library(ggplot2)
+library(gridExtra)
+library(psych)
+
+
+
+
+```
+
+```{r echo=F}
+setwd("~/Documents/Projects/ADEC7310_R/Midterms/")
+data <- read_csv("Data/Titanic/train.csv")
+```
+
+# *Problem:*
+
+The problem being considered is one interested in predicting whether or
+not an individual aboard the titanic would survive. The model used to
+solve this problem accounts for numerous variables that describe each
+individual who was on the titanic during the disaster.
+
+# *Significance:*
+
+This problem is significant for those considering an arctic cruise,
+especially if they're interested maximizing their odds of survival
+should something go wrong. Otherwise, these such problems are
+interesting in the least by showing how differences among passengers
+directly relate to their outcome.
+
+These sorts of problems also provide insight into how decisions are made
+during times of distress.
+
+\newpage
+
+# *Data:*
+
+```{r echo=FALSE}
+missmap(data)
+```
+
+```{r echo=FALSE}
+surData <- data %>% filter(data$Survived==1)
+deaData <- data %>% filter(data$Survived==0)
+
+s_plot<- ggplot(surData, aes(x=Age)) + 
+            geom_histogram(aes(y=..density..), colour="black", fill="lightgreen")+
+            geom_density(alpha=.2, fill="#33FF00") +
+            ggtitle("Survived")
+
+d_plot <- ggplot(deaData, aes(x=Age)) + 
+            geom_histogram(aes(y=..density..), colour="black", fill="#FF0033")+
+            geom_density(alpha=.2, fill="#FF0000") +
+            ggtitle("Died")
+
+grid.arrange(s_plot, d_plot, nrow=2)
+
+
+```
+
+```{r}
+summary(surData$Age)
+summary(deaData$Age)
+```
+
+```{r echo=FALSE}
+sM_data <- surData %>% filter(surData$Sex=="male")
+sF_data <- surData %>% filter(surData$Sex=="female")
+
+sM_plot<- ggplot(sM_data, aes(x=Age[Sex=="male"])) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="lightblue")+
+  geom_density(alpha=.2, fill="#3399FF") +
+  labs(title = "Survived -- Male", x="Age")
+
+
+sF_plot<- ggplot(sF_data, aes(x=Age[Sex=="female"])) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="lightpink")+
+  geom_density(alpha=.2, fill="#FF99FF") +
+  labs(title = "Survived -- Female", x="Age")
+
+
+grid.arrange(sM_plot, sF_plot, nrow=2)
+```
+
+```{r}
+summary(sM_data$Age)
+summary(sF_data$Age)
+```
+
+ 
+
+## Exploring NA's
+
+```{r}
+naClassCount <- data %>% filter(is.na(data$Age))
+
+table(naClassCount$Survived, naClassCount$Sex)
+table(naClassCount$Survived, naClassCount$Pclass)
+```
+
+```{r echo=F}
+data <- data[!is.na(data$Age),]
+
+surData <- data %>% filter(data$Survived==1)
+deaData <- data %>% filter(data$Survived==0)
+
+sM_data <- surData %>% filter(surData$Sex=="male")
+sF_data <- surData %>% filter(surData$Sex=="female")
+```
+
+```{r}
+summary(surData$Age)
+summary(deaData$Age)
+summary(sM_data$Age)
+summary(sF_data$Age)
+```
+
+```{r}
+# NA's now omitted
+data <- data[!is.na(data$Age),]
+
+table(data$Survived, data$Pclass)
+
+surDataNoNA <- data %>% filter(data$Survived==1)
+deaDataNoNA <- data %>% filter(data$Survived==0)
+
+ggplot(data = surDataNoNA) + 
+  stat_count(mapping = aes(x = Pclass), col="lightgreen")
+ggplot(data = deaDataNoNA) + 
+  stat_count(mapping = aes(x = Pclass), col = "red") 
+
+deaFirstNoNA <- deaDataNoNA %>% filter(deaDataNoNA$Pclass==1)
+surFirstNoNA <- surDataNoNA %>% filter(surDataNoNA$Pclass==1)
+
+sum(deaFirstNoNA$Sex=="male")
+proportion1 <- sum(deaFirstNoNA$Sex=="male") / nrow(deaFirstNoNA) 
+proportion1
+sum(surFirstNoNA$Sex=="male")
+proportion2 <- sum(surFirstNoNA$Sex=="male") / nrow(surFirstNoNA)
+proportion2
+
+mean(deaFirstNoNA$SibSp)
+mean(surFirstNoNA$SibSp)
+```
+
+\newpage
+
+# *Literature:*
+
+These types of logistic regression models have been used by researchers
+in various methods. One that I will be mentioning in this analysis is
+titled, "Binary Logistic Regression Analysis in Assessment and
+Identifying Factors That Influence Student's Academic Achievement: The
+Case of College of Natural and Computational Science, Wolaita Sodo
+University, Ethiopia". The title suggests the study's focus, and a
+primary method used in this study was the Binary Logistic Regression
+Model.
+
+<https://files.eric.ed.gov/fulltext/EJ1115855.pdf>
+
+Another study to use logistic regression is "Survival Analysis and
+Regression Models" by Brandon George, Samantha Seals, and Inmaculada
+Aban. This study uses the regression model in medical research to
+compare observed survival curves among different groups.
+
+<https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4111957/>
+
+# *Type of Models:*
+
+For this problem I used a logarithmic model. Since we have categorical
+variables (gender, class, etc), it is simply best practice to use
+logarithmic models. Since these variables can't effectively be evaluated
+numerically, we apply the natural log to convert them into percentages,
+seen by taking a value between 0 and 1. This allows us to infer
+meaningful interpretation of variables that would otherwise be difficult
+to interpret.
+
+# *Formulation:*
+
+Creating this model was rather simple given the limited amount of
+variables. With gender being a significant contributing factor, along
+with having categorical variables and with us measuring either 'success'
+or 'failure', our regression model is binomial. It was necessary to
+remove the NA values from the test data set but this allows us to fit
+our model to the data.
+
+```{r}
+setwd("~/Documents/Projects/ADEC7310_R/Midterms/")
+
+trainRaw <- read_csv("Data/Titanic/train.csv")
+train <- trainRaw[!is.na(trainRaw$Age),]
+
+myglm = glm(Survived~ Age + Pclass + Sex + SibSp, data=train, family=binomial)
+summary(myglm)
+
+test <- read.csv("Data/titanic/test.csv", stringsAsFactors=T)
+
+sum(is.na(test$Age))
+test$Age[is.na(test$Age)] = median(train$Age)
+
+mypred <- predict(myglm, test)
+
+mypred[mypred>=0.54]=1
+mypred[mypred<0.54]=0
+
+PassengerID=seq(892,1309)
+Survived=mypred
+
+mydf = data.frame(PassengerID, Survived)
+```
+
+# *Performance / Accuracy:*
+
+![](images/final.png "Submission")
+
+![](images/withname.png)
+
+With a score of 0.7799, this models correctly predicts the survival
+outcome for 78% of the test data.
+
+# *Limitations:*
+
+Some limitations of this model are the amount of variables available to
+use as well as the intended estimation. Since we are estimating a binary
+yes or no and are rounding our computed probabilities, naturally, this
+model will be imperfect. If the determination is off by the slightest
+amount, we will compute an inaccurate estimate.
+
+# *Learning:*
+
+An important learning objective of this problem is to build a regression
+model from data and then fit the model to test data. This will allow us
+to build models from population samples that we can then fit to the
+population to make predictions.
+
+# 

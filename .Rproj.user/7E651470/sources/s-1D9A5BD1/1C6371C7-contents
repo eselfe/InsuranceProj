@@ -1,0 +1,150 @@
+---
+title: "Assignment 6"
+subtitle: "ADEC 7310.02"
+author: "Silas Selfe"
+affiliation: "Boston College"
+date: "10/10/2021"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+```
+
+
+```{r echo=FALSE}
+library(readr)
+library(psych)
+```
+
+```{r echo=FALSE}
+setwd("~/Documents/Projects/ADEC7310_R/Assignments/")
+data <- read_csv("Data/week 6 data.csv")
+```
+
+
+# Prompt  
+The column RVUs is a representation of standard outpatient workload.  Using R, conduct correlation analysis and intepret.  Then fit a linear model with Expenditures~RVUs.  Interpret the results and linear regression assumptions.  Then fit a linear model of ln(Expenditures)~RVUs.  How did this transformation affect the assumptions?
+
+
+![Rubric](rubric.png){height=50%}
+
+----------
+Problems numbered according to rubric. 
+----------
+
+\newpage
+
+
+
+# 1. Run Correlation
+```{r}
+cor(data[,1:4])
+
+```
+
+&nbsp;
+
+```{r echo=FALSE}
+pairs.panels(data[,-5], 
+             method = "pearson", # correlation method
+             hist.col = "#00AFBB",
+             density = TRUE,  # show density plots
+             ellipses = TRUE # show correlation ellipses
+             )
+```
+
+&nbsp;
+
+# 2. Interpret Correlation Output
+The simplest way to derive information from the outputted table above, is to observe the correlation values that lie to the right of all diagonally decreasing 1.0000 values. If you are interested in finding a correlation between any of the variables, it can be done by going to its existing row (or column), and finding the cell on the table where your two variables meet. You can choose a row and then find its column, or vice versa.
+
+&nbsp;  
+
+The highest observed correlation exists between Expenditures and FTE's at a value of 0.9796506 which is easily seen in the first row of the above graphical display.  The variable of interest, RVUs, is highly correlated with Expenditures with a value of 0.9217239. All other correlations can be easily interpreted with the above graph and table. 
+
+
+\newpage
+# 3. Run Expenditures~RVU Regression
+
+```{r out.width="70%"}
+plot(data$Expenditures~data$RVUs)
+abline(lm(data$Expenditures~data$RVUs))
+
+p3lm <- lm(data$Expenditures~data$RVUs)
+summary(p3lm)
+```
+# 4. Interpret Expenditures~RVU Regression
+With a multiple R-squared value of 0.8496, this means that 84.56% of observed expenditure values can be explained by RVUs. This test is statistically significant at the 0.001 level, with a very strong p-value. A coefficient of 2.351e+02 suggests that each addition in value of RVUs is met with an increase of 235.1 in expenditures.  
+
+&nbsp;  
+
+If RVUs is measured in hours and Expenditures in dollars, then each additional outpatient hour would increase expenditures by $235.1. 
+
+
+
+
+
+\newpage
+# 5. Investigate Regression Assumptions, Expenditures~RVUs
+```{r out.width="50%"}
+plot(lm(data$Expenditures~data$RVUs))
+```
+
+&nbsp;  
+
+&nbsp;  
+
+
+**Assumption 1:** nearly normal  
+The graphic in problem 1 shows that the distributions are not nearly normal, but skewed right. Also seen on Normal Q-Q plot.  
+&nbsp;  
+**Assumption 2:** residual variability nearly constant  
+As seen in the top left graph above, the residuals are not nearly constant. Seen in the P3 summary, the residuals are also not centered around 0.   
+&nbsp;  
+**Assumption 3:** independent residuals  
+In the residuals vs fitted plot, the data is not randomly scattered, so the residuals are not independent.     
+&nbsp;  
+**Assumption 4:** variable is linearly related to outcome  
+This assumption seems to hold. 
+
+\newpage
+# 6. Run ln(Expenditures)~RVU Regression
+```{r out.width="70%"}
+plot(log(data$Expenditures)~data$RVUs)
+abline(lm(log(data$Expenditures)~data$RVUs))
+
+p6lm <- lm(log(data$Expenditures)~data$RVUs)
+summary(p6lm)
+```
+
+# 7. Interpret ln(Expenditures)~RVU Regression
+As before the transformation, RVUs has statistical significance on its affecting Expenditures. The intercept is now significant when it wasn't before, signifying an overall better fit. The interpretation of this indicates that for each additional value of RVU, expenditures will increase by 1.349e-06 percent. 
+
+\newpage
+# 8. Investigate Regression Assumptions, ln(Expenditures)~RVUs
+```{r out.width="50%"}
+plot(p6lm)
+```
+&nbsp;  
+&nbsp;  
+ 
+**Assumption 1:** nearly normal    
+The data is now nearly normal -- this is seen in the Normal Q-Q plot. This assumption is satisfied.   
+&nbsp;  
+**Assumption 2:** residual variability nearly constant    
+This assumption is still not satisfied. There is a clear pattern in the Residuals vs Fitted plot and the observations are not equally scattered.   
+&nbsp;  
+**Assumption 3:** independent residuals   
+This assumption is not satisfied. There is a clear pattern in the Residuals vs Fitted plot.   
+&nbsp;  
+**Assumption 4:** variable is linearly related to outcome   
+The variable is related to the outcome, though it takes a shape closer to a squared variable, so using a linear model may need to be reassessed. 
+
+# 9. Explain Effect of Transformation
+The transformation achieved its goal of making the distribution more symmetric. When the data is skewed to the right, taking the natural log can be advantageous, and when skewed to the left, squaring can be advantageous. This transformation did not achieve its goal of making the form of the scatter plot more linear. The transformation also did not improve the spread of the residual plot, which is another goal of transformation. 

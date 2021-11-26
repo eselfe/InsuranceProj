@@ -1,0 +1,339 @@
+---
+title: "Assignment 5"
+subtitle: "ADEC 7310.02"
+author: "Silas Selfe"
+affiliation: "Boston College"
+date: "9/30/2021"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+
+```
+
+```{r, echo=FALSE}
+library(rticles)
+library(tinytex)
+library(xtable)
+library(stargazer)
+library(pander)
+library(tables)
+library(ascii)
+library(knitr)
+```
+
+# Problem 1 ------------------------------------------------------------------
+
+```{r}
+Mu <- 109
+n <- 190
+xBar <- 110
+sigma <- 6
+alpha <- 0.05
+```
+
+$$H_o:\mu = 109$$ $$H_A:\mu\neq109$$
+
+```{r}
+SE_x <- sigma / sqrt(n)
+Z <- (xBar - Mu) / SE_x
+
+(1 - pnorm(Z))*2
+```
+
+## ***Answer***
+
+At the 0.05 level of significance, there is sufficient evidence to
+reject the null hypothesis. The data shows that there is a difference
+between the Computer Aided Instruction and the traditional license
+training technique.
+
+\newpage
+
+# Problem 2 ------------------------------------------------------------------
+
+```{r}
+Mu <- 5.3
+n <- 5
+xBar <- 5.0
+sigma <- 1.1
+alpha <- 0.05
+```
+
+$$H_o:\mu = 5.3$$ $$H_A:\mu<5.3$$
+
+```{r}
+SE <- sigma / sqrt(n)
+
+Z <- (xBar - Mu) / SE
+
+pnorm(Z)
+```
+
+## ***Answer***
+
+At the 0.05 level of significance, there is insufficient evidence to
+reject the null hypothesis of there being insufficient levels of ozone.
+
+\newpage
+
+# Problem 3 ------------------------------------------------------------------
+
+```{r}
+Mu <- 7.3
+n <- 51
+xBar <- 7.1
+var <- 0.49
+alpha <- 0.01
+```
+
+$$H_o:\mu = 7.3$$ $$H_A:\mu\neq7.3$$
+
+```{r}
+sigma <- sqrt(var)
+
+SE <- sigma / sqrt(n)
+Z <- (xBar - Mu) / SE
+
+pnorm(Z)*2
+```
+
+\newpage
+
+# Problem 4
+
+```{r}
+p <- 0.36
+pH <- 0.29
+n <- 100
+alpha <- 0.02
+```
+
+$$H_o:p=0.36$$ $$H_A:p<0.36$$ $$
+Z = \frac{\text{point estimate} - \text{null value}}{SE}
+$$
+
+$$
+SE_{\hat{p}} = \sqrt{\frac{p(1-p)}{n}}
+$$
+
+```{r}
+SE <- sqrt((p*(1-p))/n)
+
+Z <- (pH - p) / SE
+
+pnorm(Z)
+```
+
+## ***Answer***
+
+At a significance level of 0.02, there is insufficient evidence to
+reject that less than 36% of the company's readers own a laptop.
+
+\newpage
+
+# Problem 5
+
+```{r}
+p <- 0.31
+n <- 380
+nPos <- 95
+pH <- nPos / n
+alpha <- 0.05
+```
+
+$$H_o:p=0.31$$ $$H_A:p<0.31$$
+
+```{r}
+SE <- sqrt((p*(1-p))/n)
+Z <- (pH - p) / SE
+
+pnorm(Z)
+```
+
+## ***Answer***
+
+At the 0.05 level of significance, there is sufficient evidence to
+reject the null hypothesis and accept the alternative which states that
+less than 31% of treated patients are uninsured.
+
+\newpage
+
+# Problem 6
+
+To find the minimum sample size (n) needed to be 99% confident that the
+sample's variance is within 1% of the population's variance, we will use
+the Margin of Error:
+
+$$
+MoE = Z * \sqrt{\frac{p(1-p)}{n}}
+$$ Since we are looking to find the bounds that hold the true population
+mean with 99% confidence, our Margin of Error is 1%. So, to find *n*
+where the population mean is *within* the MoE (1%), we use: $$
+0.01 > Z*\sqrt{\frac{p(1-p)}{n}}
+$$
+
+```{r}
+conf <- 0.99
+alpha <- 1-conf
+
+Z_a <- alpha / 2
+Z <- abs(qnorm(Z_a))
+```
+
+Since the margin of error is largest when (p = 0.5), we will use this
+value as the worse case value for (p), and solve for (n).
+
+```{=tex}
+\begin{align*}
+0.01 & > 2.576*\sqrt{\frac{0.5(1-0.5)}{n}} \\
+0.01^2 &> 2.576^2*\frac{0.5(0.5)}{n} \\
+n & > 2.576^2*\frac{0.25}{0.01^2}
+\end{align*}
+```
+Solving for n, we use the equation: $$
+n = Z^2*\frac{p(1-p)}{E^2}
+$$
+
+```{r}
+p <- 0.5
+E <- 0.01
+
+n <- Z^2 * ((p*(1-p)) / E^2)
+n
+```
+
+## ***Answer***
+
+The minimum sample size needed to ensure 99% confidence of a sample's
+variance being within 1% of the population's variance is 16587.
+
+\newpage
+
+# Problem 7
+
+```{r}
+Mu = 112
+sigma <- 24
+
+n <- 22
+xBar <- 102
+s <- 15.4387
+
+alpha <- 0.1
+df = n-1
+```
+
+$$H_o:\sigma = 24$$ $$H_A:\sigma < 24$$ This will be a left tailed test.
+
+Finding the Critical Value:
+
+```{r}
+criticalVal <- qchisq(p=alpha, df=df)
+criticalVal
+
+X2 <- (df * s^2) / sigma^2
+X2
+```
+
+## ***Answer***
+
+Since this is a one tailed test (lower) and our Chi-Square value of
+`r X2` falls below the critical value of `r criticalVal` the 0.1 level
+of significance, we have sufficient evidence to reject the claim that
+the standard deviation of test scores has not decreased.
+
+\newpage
+
+# Problem 8
+
+```{r echo=FALSE}
+matrix <- matrix(nrow=3, ncol=4)
+matrix[1,] <- c("", "n", "xBar", "s")
+matrix[2,] <- c("M1, Smokers",32,87,9)
+matrix[3,] <- c("M2, Non-Smokers", 31,84,10)
+
+kable(matrix[,], caption="Smokers v Non-Smokers")
+```
+$$H_o:M_1 - M_2 = 0$$
+$$H_A: M_1 - M_2 \neq 0$$
+```{r}
+n1 <- 32
+n2 <- 31
+M1 <- 87
+M2 <- 84
+s1 <- 9
+s2 <- 10
+```
+
+
+Standard Error: 
+$$
+SE = \sqrt{\frac{s_1^2}{n_1}+\frac{s_2^2}{n_2}}
+$$
+```{r}
+inSE_1 <- s1^2 / n1
+inSE_2 <- s2^2 / n2
+
+SE <- sqrt(inSE_1 + inSE_2)
+Tsc <- (M1-M2) / SE
+```
+The T statistic associated with this test is `r Tsc`, and its corresponding p-value is:
+
+```{r}
+pt(Tsc, df=30,lower.tail=FALSE)*2
+```
+
+At a significance level of 0.1, there is not sufficient evidence to reject the null, which states that there is a difference in pulse rates between smokers and non smokers. 
+
+
+
+\newpage
+# Problem 9
+
+
+
+
+
+
+
+\newpage
+# Problem 10
+
+```{r}
+df <- data.frame(matrix(ncol=10,nrow=4))
+
+df[1,] <- c(32,27,34,24,31,25,30,23,27,35)
+df[2,] <- c(28,28,33,25,26,29,33,27,25,33)
+
+sum(df[1,])
+sum(df[2,])
+```
+```{r}
+for (i in 1:length(df)){
+  df[3,i] <- df[1,i] - df[2,i]
+  df[4,i] <- df[3,i]^2
+}
+sum(df[3,])
+```
+
+
+
+
+
+
+yo 
+
+
+```{r}
+x <- 12
+```
+
+
+

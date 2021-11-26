@@ -1,0 +1,11 @@
+# Insurance
+
+
+
+data <- py$data
+attach(data)
+
+mean(data$YOJ, na.rm=T)
+
+
+hist(INCOME)

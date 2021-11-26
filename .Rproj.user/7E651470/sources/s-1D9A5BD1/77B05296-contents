@@ -1,0 +1,7 @@
+
+
+
+```{r}
+setwd("C:/Users/Silas/Documents/ADEC7320")
+data <- read_csv("Data/insurance_training_data.csv")
+```
